@@ -11,6 +11,9 @@ init();
 animate();
 
 function init(){
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
@@ -19,6 +22,7 @@ function init(){
     renderer.setSize( window.innerWidth, window.innerHeight );
     document.body.appendChild( renderer.domElement );
     document.body.appendChild( ARButton.createButton(renderer) );
+    container.appendChild( renderer.domElement );
 
     const light = new THREE.HemisphereLight( 0xffffff, 0xbbbbff, 1 );
     light.position.set( 0.5, 1, 0.25 );
@@ -30,8 +34,10 @@ function init(){
         const material = new THREE.MeshPhongMaterial( { color: 0xffffff * Math.random() } );
         const mesh = new THREE.Mesh( cylinderGeo, material );
         mesh.position.set( 0, 0, - 0.3 ).applyMatrix4( controller.matrixWorld );
-        mesh.quaternion.setFromRotationMatrix( controller.matrixWorld );
+        //mesh.quaternion.setFromRotationMatrix( controller.matrixWorld );
         scene.add( mesh );
+
+        //createARCube(1, 0x3232c2);
     }
 
     controller = renderer.xr.getController(0);
@@ -44,8 +50,6 @@ function init(){
     createCube({x: 0, y: 1, z: 0}, 1, 0x3232c2);
     camera.position.z = 5;
 }
-
-
 
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -63,6 +67,17 @@ function createSphere(pos, radius, segments, color){
     l_spheres.push(sphere);
 }
 
+function createARCube(size, color){
+    let geometry = new THREE.BoxGeometry(size, size, size);
+    let material = new THREE.MeshBasicMaterial( {color: color} );
+    let cube = new THREE.Mesh( geometry, material );
+    cube.position.set( 0, 0, - 0.3 ).applyMatrix4( controller.matrixWorld );
+    cube.quaternion.setFromRotationMatrix( controller.matrixWorld );
+    cube.name = "cube" + l_cubes.length;
+    scene.add(cube);
+    l_cubes.push(cube);
+}
+
 function createCube(pos, size, color){
     let geometry = new THREE.BoxGeometry(size, size, size);
     let material = new THREE.MeshBasicMaterial( {color: color} );
@@ -74,6 +89,9 @@ function createCube(pos, size, color){
 }
 
 function animate() {
-	requestAnimationFrame( animate );
-	renderer.render( scene, camera );
+	renderer.setAnimationLoop(render);
+}
+
+function render(){
+    renderer.render(scene,camera);
 }
